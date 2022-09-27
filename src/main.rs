@@ -1,4 +1,6 @@
 fn main() {
+    std::env::set_var("RUST_BACKTRACE", "1");
+
     if std::env::current_dir()
         .unwrap()
         .to_string_lossy()
@@ -10,7 +12,7 @@ fn main() {
     match check_java() {
         Ok(_) => (),
         Err(e) => {
-            println!("Error: {e}\nPress any key to exit.");
+            println!("Error: {e} on {:#?}\nPress enter to exit.", e.backtrace());
             std::io::stdin().read_line(&mut String::new()).unwrap();
         }
     }
@@ -32,7 +34,6 @@ fn get_jar_name() -> anyhow::Result<String> {
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 fn check_java() -> anyhow::Result<()> {
-    std::process::Command::new("java").arg("-version").output()?;
     let cmd = std::process::Command::new("java").arg("-version").output();
 
     if cmd.map(|s| s.status.success()).ok() == Some(true) {
