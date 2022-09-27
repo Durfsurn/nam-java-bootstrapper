@@ -12,12 +12,9 @@ fn main() {
 
 #[cfg(target_os = "linux")]
 fn check_java() {
-    let cmd = std::process::Command::new("java")
-        .arg("-version")
-        .output()
-        .unwrap();
+    let cmd = std::process::Command::new("java").arg("-version").output();
 
-    if cmd.status.success() {
+    if cmd.map(|s| s.status.success()).ok() == Some(true) {
         // you have java!
         std::process::Command::new("sudo")
             .args(["java", "-jar", "NetworkAddonMod_Setup_Version44.jar"])
@@ -30,12 +27,9 @@ fn check_java() {
 
 #[cfg(target_os = "macos")]
 fn check_java() {
-    let cmd = std::process::Command::new("java")
-        .arg("-version")
-        .output()
-        .unwrap();
+    let cmd = std::process::Command::new("java").arg("-version").output();
 
-    if cmd.status.success() {
+    if cmd.map(|s| s.status.success()).ok() == Some(true) {
         // you have java!
         std::process::Command::new("sudo")
             .args(["java", "-jar", "NetworkAddonMod_Setup_Version44.jar"])
@@ -49,12 +43,9 @@ fn check_java() {
 #[cfg(target_os = "windows")]
 fn check_java() {
     println!("Checking if Java is installed...");
-    let cmd = std::process::Command::new("java")
-        .arg("-version")
-        .output()
-        .unwrap();
-
-    if cmd.status.success() {
+    let cmd = std::process::Command::new("java").arg("-version").output();
+    
+    if cmd.map(|s| s.status.success()).ok() == Some(true) {
         println!("\x1b[1;32mJava is installed!\x1b[0m");
         println!("Looking for SimCity 4.exe...");
 
