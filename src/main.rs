@@ -117,7 +117,7 @@ fn check_java() -> anyhow::Result<()> {
                         .filter(|f| {
                             f.file_name().and_then(|f| f.to_str()) == Some("SimCity 4 Deluxe")
                         })
-                        .map(|f| f.canonicalize()?)
+                        .map(|f| f.canonicalize().unwrap())
                         .collect::<Vec<_>>()
                 })
                 .collect::<Vec<_>>();
@@ -140,11 +140,13 @@ fn check_java() -> anyhow::Result<()> {
 
                 // you have java and your exe is patched!
                 std::process::Command::new("cmd")
-                    .args(["/c", "start", "/MIN", "java", "-jar", get_jar_name()?])
+                    .args(["/c", "start", "/MIN", "java", "-jar", &get_jar_name()?])
                     .spawn()?;
             }
         }
     } else {
         open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
+
+    Ok(())
 }
