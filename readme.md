@@ -1,4 +1,8 @@
-## NAM Installer Bootstrapper
+# NAM Installer Bootstrapper
+
+[![Windows](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/windows.yml/badge.svg)](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/windows.yml)
+[![MacOS](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/mac.yml/badge.svg)](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/mac.yml)
+[![Linux](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/linux.yml/badge.svg)](https://github.com/Durfsurn/nam-java-bootstrapper/actions/workflows/linux.yml)
 
 ### Build instructions
 
