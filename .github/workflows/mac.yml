@@ -22,4 +22,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: nam-java-bootstrapper-macos
-        path: target/release/nam-java-bootstrapper
+        path: target/debug/nam-java-bootstrapper
