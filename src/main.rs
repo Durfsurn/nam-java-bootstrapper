@@ -7,44 +7,66 @@ fn main() {
         panic!("Running inside a .zip is unsupported!");
     }
 
-    check_java();
+    match check_java() {
+        Ok(_) => (),
+        Err(e) => {
+            println!("Error: {e}\nPress any key to exit.");
+            std::io::stdin().read_line(&mut String::new()).unwrap();
+        }
+    }
 }
 
-#[cfg(target_os = "linux")]
-fn check_java() {
+fn get_jar_name() -> anyhow::Result<String> {
+    let files = std::fs::read_dir(std::env::current_dir()?)?;
+    files
+        .into_iter()
+        .filter_map(|f| f.ok())
+        .find(|f| {
+            f.file_name()
+                .to_string_lossy()
+                .contains("NetworkAddonMod_Setup_Version")
+        })
+        .map(|f| f.file_name().to_string_lossy().to_string())
+        .ok_or_else(|| anyhow::anyhow!("No installer file found!"))
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+fn check_java() -> anyhow::Result<()> {
+    std::process::Command::new("java").arg("-version").output()?;
     let cmd = std::process::Command::new("java").arg("-version").output();
 
     if cmd.map(|s| s.status.success()).ok() == Some(true) {
         // you have java!
-        std::process::Command::new("sudo")
-            .args(["java", "-jar", "NetworkAddonMod_Setup_Version44.jar"])
-            .spawn()
-            .unwrap();
+        std::process::Command::new("java")
+            .args(["-jar", &get_jar_name()?])
+            .spawn()?;
     } else {
-        open::that("https://adoptium.net/temurin/releases/?version=8").unwrap();
+        open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
+
+    Ok(())
 }
 
-#[cfg(target_os = "macos")]
-fn check_java() {
-    let cmd = std::process::Command::new("java").arg("-version").output();
+// #[cfg(target_os = "macos")]
+// fn check_java() -> anyhow::Result<()> {
+//     let cmd = std::process::Command::new("java").arg("-version").output();
 
-    if cmd.map(|s| s.status.success()).ok() == Some(true) {
-        // you have java!
-        std::process::Command::new("sudo")
-            .args(["java", "-jar", "NetworkAddonMod_Setup_Version44.jar"])
-            .spawn()
-            .unwrap();
-    } else {
-        open::that("https://adoptium.net/temurin/releases/?version=8").unwrap();
-    }
-}
+//     if cmd.map(|s| s.status.success()).ok() == Some(true) {
+//         // you have java!
+//         std::process::Command::new("sudo")
+//             .args(["java", "-jar", get_jar_name()?])
+//             .spawn()
+//             ?;
+//     } else {
+//         open::that("https://adoptium.net/temurin/releases/?version=8")?;
+//     }
+// }
 
 #[cfg(target_os = "windows")]
-fn check_java() {
+fn check_java() -> anyhow::Result<()> {
     println!("Checking if Java is installed...");
     let cmd = std::process::Command::new("java").arg("-version").output();
-    
+
     if cmd.map(|s| s.status.success()).ok() == Some(true) {
         println!("\x1b[1;32mJava is installed!\x1b[0m");
         println!("Looking for SimCity 4.exe...");
@@ -60,7 +82,7 @@ fn check_java() {
             r"C://Program Files (x86)/Maxis/SimCity 4 Deluxe",
         ] {
             if std::fs::read_dir(folder).is_ok() {
-                let mut pathbuf: std::path::PathBuf = folder.parse().unwrap();
+                let mut pathbuf: std::path::PathBuf = folder.parse()?;
                 pathbuf.push("Apps");
                 pathbuf.push("SimCity 4.exe");
                 files.push(pathbuf);
@@ -71,14 +93,14 @@ fn check_java() {
         println!("Any other character will exit.\x1b[0m");
 
         let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
+        std::io::stdin().read_line(&mut input)?;
 
         if input.trim().to_uppercase() == "P" {
             println!("{}[AInput your path:", 27u8 as char);
             let mut value = String::new();
-            std::io::stdin().read_line(&mut value).unwrap();
+            std::io::stdin().read_line(&mut value)?;
 
-            files.push(value.trim().parse().unwrap())
+            files.push(value.trim().parse()?)
         } else if files.is_empty() && input.trim().to_uppercase() == "S" {
             println!("{}[A ", 27u8 as char);
             files = ('A'..='Z') // 'Z'
@@ -94,7 +116,7 @@ fn check_java() {
                         .filter(|f| {
                             f.file_name().and_then(|f| f.to_str()) == Some("SimCity 4 Deluxe")
                         })
-                        .map(|f| f.canonicalize().unwrap())
+                        .map(|f| f.canonicalize()?)
                         .collect::<Vec<_>>()
                 })
                 .collect::<Vec<_>>();
@@ -110,27 +132,18 @@ fn check_java() {
 
             std::process::Command::new(".\\4gb_patch.exe")
                 .arg(sc4_path.clone())
-                .output()
-                .unwrap();
+                .output()?;
 
             if std::fs::read(sc4_path.replace(".exe", ".exe.Backup")).is_ok() {
                 println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
 
                 // you have java and your exe is patched!
                 std::process::Command::new("cmd")
-                    .args([
-                        "/c",
-                        "start",
-                        "/MIN",
-                        "java",
-                        "-jar",
-                        ".\\NetworkAddonMod_Setup_Version44.jar",
-                    ])
-                    .spawn()
-                    .unwrap();
+                    .args(["/c", "start", "/MIN", "java", "-jar", get_jar_name()?])
+                    .spawn()?;
             }
         }
     } else {
-        open::that("https://adoptium.net/temurin/releases/?version=8").unwrap();
+        open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
 }
