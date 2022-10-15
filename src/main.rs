@@ -23,6 +23,12 @@ fn get_jar_name() -> anyhow::Result<String> {
     files
         .into_iter()
         .filter_map(|f| f.ok())
+        .filter(|f| {
+            f.path()
+                .extension()
+                .map(|s| s.to_string_lossy().to_string())
+                == Some("jar".into())
+        })
         .find(|f| {
             f.file_name()
                 .to_string_lossy()
@@ -69,7 +75,8 @@ fn check_java() -> anyhow::Result<()> {
     let cmd = std::process::Command::new("java").arg("-version").output();
 
     if cmd.map(|s| s.status.success()).ok() == Some(true) {
-        println!("\x1b[1;32mJava is installed!\x1b[0m");
+        println!("Java is installed!");
+        // println!("\x1b[1;32mJava is installed!\x1b[0m");
         println!("Looking for SimCity 4.exe...");
 
         // patch sc4 exe
@@ -90,8 +97,10 @@ fn check_java() -> anyhow::Result<()> {
             }
         }
 
-        println!("\x1b[1;34mSimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
-        println!("Any other character will exit.\x1b[0m");
+        println!("SimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
+        // println!("\x1b[1;34mSimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
+        println!("Any other character will exit.");
+        // println!("Any other character will exit.\x1b[0m");
 
         let mut input = String::new();
         std::io::stdin().read_line(&mut input)?;
@@ -136,7 +145,8 @@ fn check_java() -> anyhow::Result<()> {
                 .output()?;
 
             if std::fs::read(sc4_path.replace(".exe", ".exe.Backup")).is_ok() {
-                println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
+                println!("Patched {sc4_path}!");
+                // println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
 
                 // you have java and your exe is patched!
                 std::process::Command::new("cmd")
