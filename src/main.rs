@@ -19,7 +19,7 @@ fn main() {
 }
 
 fn get_jar_name() -> anyhow::Result<String> {
-    let files = std::fs::read_dir(std::env::current_dir()?)?;
+    let files = std::fs::read_dir(format!("bin/{}", std::env::current_dir()?))?;
     let jar = files
         .into_iter()
         .filter_map(|f| f.ok())
@@ -36,7 +36,7 @@ fn get_jar_name() -> anyhow::Result<String> {
         })
         .map(|f| f.file_name().to_string_lossy().to_string())
         .ok_or_else(|| anyhow::anyhow!("No installer file found!"))?;
-        
+
     Ok(format!("bin/{jar}"))
 }
 
