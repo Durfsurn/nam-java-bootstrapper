@@ -19,7 +19,7 @@ fn main() {
 }
 
 fn get_jar_name() -> anyhow::Result<String> {
-    let files = std::fs::read_dir(format!("bin/{}", std::env::current_dir()?))?;
+    let files = std::fs::read_dir(format!("bin/{}", std::env::current_dir()?.to_string_lossy()))?;
     let jar = files
         .into_iter()
         .filter_map(|f| f.ok())
@@ -99,7 +99,7 @@ fn check_java() -> anyhow::Result<()> {
             }
         }
 
-        println!("SimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
+        println!("SimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4 Deluxe Folder? (P)");
         // println!("\x1b[1;34mSimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
         println!("Any other character will exit.");
         // println!("Any other character will exit.\x1b[0m");
@@ -112,7 +112,8 @@ fn check_java() -> anyhow::Result<()> {
             let mut value = String::new();
             std::io::stdin().read_line(&mut value)?;
 
-            files.push(value.trim().parse()?)
+            let path = value.trim().replace("Apps/", "").replace("SimCity 4.exe", "");
+            files.push(path.parse()?)
         } else if files.is_empty() && input.trim().to_uppercase() == "S" {
             println!("{}[A ", 27u8 as char);
             files = ('A'..='Z') // 'Z'
