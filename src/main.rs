@@ -144,6 +144,7 @@ fn check_java() -> anyhow::Result<()> {
             panic!("Invalid character entered.");
         }
 
+        let mut success = Vec::new();
         for mut file in files {
             file.push("Apps");
             file.push("SimCity 4.exe");
@@ -156,14 +157,26 @@ fn check_java() -> anyhow::Result<()> {
 
             if std::fs::read(sc4_path.replace(".exe", ".exe.Backup")).is_ok() {
                 println!("Patched {sc4_path}!");
-                // println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
+                success.push(true);
+            } else {
+                success.push(false);
+            };
+            // println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
+        }
+        if success.iter().any(|s| s == &false) {
+            println!("Detected a failed patch. Override (Y)? Or exit (any)?");
 
-                // you have java and your exe is patched!
-                std::process::Command::new("cmd")
-                    .args(["/c", "start", "/MIN", "java", "-jar", &get_jar_name()?])
-                    .spawn()?;
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input)?;
+
+            if input.trim().to_uppercase() != "Y" {
+                return Err(anyhow::anyhow!("User exit."))
             }
         }
+        // you have java and your exe is patched!
+        std::process::Command::new("cmd")
+            .args(["/c", "start", "/MIN", "java", "-jar", &get_jar_name()?])
+            .spawn()?;
     } else {
         open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
