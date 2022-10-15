@@ -19,7 +19,10 @@ fn main() {
 }
 
 fn get_jar_name() -> anyhow::Result<String> {
-    let files = std::fs::read_dir(format!("bin/{}", std::env::current_dir()?.to_string_lossy()))?;
+    let mut bin_dir = std::env::current_dir()?;
+    bin_dir.push("bin");
+
+    let files = std::fs::read_dir(bin_dir)?;
     let jar = files
         .into_iter()
         .filter_map(|f| f.ok())
@@ -108,11 +111,15 @@ fn check_java() -> anyhow::Result<()> {
         std::io::stdin().read_line(&mut input)?;
 
         if input.trim().to_uppercase() == "P" {
-            println!("{}[AInput your path:", 27u8 as char);
+            println!("Input your path:");
+            // println!("{}[AInput your path:", 27u8 as char);
             let mut value = String::new();
             std::io::stdin().read_line(&mut value)?;
 
-            let path = value.trim().replace("Apps/", "").replace("SimCity 4.exe", "");
+            let path = value
+                .trim()
+                .replace("Apps/", "")
+                .replace("SimCity 4.exe", "");
             files.push(path.parse()?)
         } else if files.is_empty() && input.trim().to_uppercase() == "S" {
             println!("{}[A ", 27u8 as char);
