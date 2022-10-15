@@ -20,7 +20,7 @@ fn main() {
 
 fn get_jar_name() -> anyhow::Result<String> {
     let files = std::fs::read_dir(std::env::current_dir()?)?;
-    files
+    let jar = files
         .into_iter()
         .filter_map(|f| f.ok())
         .filter(|f| {
@@ -35,7 +35,9 @@ fn get_jar_name() -> anyhow::Result<String> {
                 .contains("NetworkAddonMod_Setup_Version")
         })
         .map(|f| f.file_name().to_string_lossy().to_string())
-        .ok_or_else(|| anyhow::anyhow!("No installer file found!"))
+        .ok_or_else(|| anyhow::anyhow!("No installer file found!"))?;
+        
+    Ok(format!("bin/{jar}"))
 }
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -140,7 +142,7 @@ fn check_java() -> anyhow::Result<()> {
             let sc4_path = file.to_string_lossy().replace(r"\\?\", "");
             println!("Patching {sc4_path}...");
 
-            std::process::Command::new(".\\4gb_patch.exe")
+            std::process::Command::new(".\\bin\\4gb_patch.exe")
                 .arg(sc4_path.clone())
                 .output()?;
 
