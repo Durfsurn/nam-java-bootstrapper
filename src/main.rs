@@ -102,7 +102,15 @@ fn check_java() -> anyhow::Result<()> {
             }
         }
 
-        println!("SimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4 Deluxe Folder? (P)");
+        if files.is_empty() {
+            println!("SimCity 4 Deluxe folder not found!\n(S) Would you like a systemwide search or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?");
+        } else {
+            println!("One or more SimCity 4 Deluxe folders were found here: {}!\n(C) Continue?\nAdditions:\n(S) Would you like a systemwide search instead? or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?", &files
+            .iter()
+            .map(|p| p.to_string_lossy().to_string())
+            .collect::<Vec<String>>()
+            .join(", "));
+        }
         // println!("\x1b[1;34mSimCity 4 Deluxe folder not found! Would you like a systemwide search (S) or provide a filepath to your SimCity 4.exe? (P)");
         println!("Any other character will exit.");
         // println!("Any other character will exit.\x1b[0m");
@@ -110,7 +118,10 @@ fn check_java() -> anyhow::Result<()> {
         let mut input = String::new();
         std::io::stdin().read_line(&mut input)?;
 
-        if input.trim().to_uppercase() == "P" {
+        if input.trim().to_uppercase() == "C" {
+            println!("Continuing...")
+        }
+        else if input.trim().to_uppercase() == "P" {
             println!("Input your path:");
             // println!("{}[AInput your path:", 27u8 as char);
             let mut value = String::new();
@@ -122,7 +133,7 @@ fn check_java() -> anyhow::Result<()> {
                 .replace("Apps\\", "")
                 .replace("SimCity 4.exe", "");
             files.push(path.parse()?)
-        } else if files.is_empty() && input.trim().to_uppercase() == "S" {
+        } else if input.trim().to_uppercase() == "S" {
             println!("{}[A ", 27u8 as char);
             files = ('A'..='Z') // 'Z'
                 .into_iter()
@@ -199,9 +210,9 @@ fn check_java() -> anyhow::Result<()> {
         std::process::Command::new("cmd")
             .args(["/c", "start", "/MIN", "java", "-jar", &get_jar_name()?])
             .spawn()?;
-        
+
         let mut input = String::new(); // remove this for production
-        std::io::stdin().read_line(&mut input)?;  // remove this for production
+        std::io::stdin().read_line(&mut input)?; // remove this for production
     } else {
         open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
