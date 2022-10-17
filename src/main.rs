@@ -115,10 +115,11 @@ fn check_java() -> anyhow::Result<()> {
             // println!("{}[AInput your path:", 27u8 as char);
             let mut value = String::new();
             std::io::stdin().read_line(&mut value)?;
-
+            let value = value.replace('\"', "");
             let path = value
                 .trim()
                 .replace("Apps/", "")
+                .replace("Apps\\", "")
                 .replace("SimCity 4.exe", "");
             files.push(path.parse()?)
         } else if files.is_empty() && input.trim().to_uppercase() == "S" {
@@ -144,16 +145,37 @@ fn check_java() -> anyhow::Result<()> {
             panic!("Invalid character entered.");
         }
 
+        println!(
+            "Patching the following .exe's: {}",
+            &files
+                .iter()
+                .map(|p| p.to_string_lossy().to_string())
+                .collect::<Vec<String>>()
+                .join(", ")
+        );
+
         let mut success = Vec::new();
-        for mut file in files {
-            file.push("Apps");
-            file.push("SimCity 4.exe");
-            let sc4_path = file.to_string_lossy().replace(r"\\?\", "");
+        for file in files {
+            let sc4_path = file
+                .to_string_lossy()
+                .replace(r"\\?\", "")
+                .replace("Apps", "")
+                .replace("SimCity 4.exe", "");
+            let sc4_path = format!(r"{}\Apps\SimCity 4.exe", sc4_path);
+
             println!("Patching {sc4_path}...");
 
-            std::process::Command::new(".\\bin\\4gb_patch.exe")
+            match std::process::Command::new(r".\bin\4gb_patch.exe")
                 .arg(sc4_path.clone())
-                .output()?;
+                .output()
+            {
+                Ok(_) => (),
+                Err(e) => {
+                    success.push(false);
+                    println!("Failed to patch {sc4_path}: {e}!");
+                    continue;
+                }
+            };
 
             if std::fs::read(sc4_path.replace(".exe", ".exe.Backup")).is_ok() {
                 println!("Patched {sc4_path}!");
@@ -170,13 +192,16 @@ fn check_java() -> anyhow::Result<()> {
             std::io::stdin().read_line(&mut input)?;
 
             if input.trim().to_uppercase() != "Y" {
-                return Err(anyhow::anyhow!("User exit."))
+                panic!("User exit.");
             }
         }
         // you have java and your exe is patched!
         std::process::Command::new("cmd")
             .args(["/c", "start", "/MIN", "java", "-jar", &get_jar_name()?])
             .spawn()?;
+        
+        let mut input = String::new(); // remove this for production
+        std::io::stdin().read_line(&mut input)?;  // remove this for production
     } else {
         open::that("https://adoptium.net/temurin/releases/?version=8")?;
     }
