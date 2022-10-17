@@ -103,9 +103,9 @@ fn check_java() -> anyhow::Result<()> {
         }
 
         if files.is_empty() {
-            println!("SimCity 4 Deluxe folder not found!\n(S) Would you like a systemwide search or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?");
+            println!("SimCity 4 Deluxe folder not found!\n(S) Would you like a systemwide search (THIS COULD TAKE A *VERY* LONG TIME) instead? or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?");
         } else {
-            println!("One or more SimCity 4 Deluxe folders were found here: {}!\n(C) Continue?\nAdditions:\n(S) Would you like a systemwide search instead? or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?", &files
+            println!("One or more SimCity 4 Deluxe folders were found here: {}!\n(C) Continue?\nAdditions:\n(S) Would you like a systemwide search (THIS COULD TAKE A *VERY* LONG TIME)? or\n(P) provide a filepath to your SimCity 4 Deluxe Folder?", &files
             .iter()
             .map(|p| p.to_string_lossy().to_string())
             .collect::<Vec<String>>()
@@ -197,7 +197,7 @@ fn check_java() -> anyhow::Result<()> {
             // println!("\x1b[1;32mPatched {sc4_path}!\x1b[0m");
         }
         if success.iter().any(|s| s == &false) {
-            println!("Detected a failed patch. Override (Y)? Or exit (any)?");
+            println!("Detected a failed patch.\n(Y) Override?\n(any) Or exit?");
 
             let mut input = String::new();
             std::io::stdin().read_line(&mut input)?;
